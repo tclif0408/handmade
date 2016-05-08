@@ -31,6 +31,7 @@
 #include <xinput.h>
 #include <dsound.h>
 #include <stdio.h>
+#include <malloc.h>
 
 // TODO: implement sine function by hand
 #include <math.h>
@@ -62,6 +63,7 @@ struct win32_sound_output {
 	int ToneVolume;
 	int SamplesPerSecond;
 	int ToneHz;
+	int LatencySampleCount;
 	uint32_t RunningSampleIndex;
 	int WavePeriod;
 	int BytesPerSample;
@@ -477,6 +479,10 @@ internal int CALLBACK WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR 
 			int64_t LastCycleCount = __rdtsc();
 
 			GlobalRunning = true;
+
+			// TODO: Pool with bitmap virtualalloc
+			int16_t *Samples = (int16_t *)VirtualAlloc(0, SoundOutput.SecondaryBufferSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+
 			while (GlobalRunning)
 			{
 				MSG Message;
@@ -536,9 +542,10 @@ internal int CALLBACK WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR 
 				DWORD PlayCursor;
 				DWORD WriteCursor;
 				bool SoundIsValid = false;
+				// NOTE: make sound logic better
 				if (SUCCEEDED(GlobalSecondaryBuffer->GetCurrentPosition(&PlayCursor, &WriteCursor)))
 				{
-					ByteToLock = ((SoundOutput->RunningSampleIndex * SoundOutput.BytesPerSample) % SoundOutput->SecondaryBufferSize);
+					ByteToLock = ((SoundOutput.RunningSampleIndex * SoundOutput.BytesPerSample) % SoundOutput.SecondaryBufferSize);
 					TargetCursor = ((PlayCursor + (SoundOutput.LatencySampleCount * SoundOutput.BytesPerSample)) % SoundOutput.SecondaryBufferSize);
 					if (ByteToLock > TargetCursor)
 					{
@@ -553,7 +560,6 @@ internal int CALLBACK WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR 
 					SoundIsValid = true;
 				}
 
-				int16_t Samples[48000 / 30 * 2];
 				game_sound_output_buffer SoundBuffer = {};
 				SoundBuffer.SamplesPerSecond = SoundOutput.SamplesPerSecond;
 				SoundBuffer.SampleCount = BytesToWrite / SoundOutput.BytesPerSample; 
