@@ -41,8 +41,8 @@ internal void RenderWeirdGradient(game_offscreen_buffer *Bitmap, int off1, int o
 		for (int x = 0; x < Width; x++)
 		{
 			uint8_t Red = (uint8_t)(x + off1);
-			uint8_t Green = (uint8_t)(y + off2);
-			uint8_t Blue = (uint8_t)(x - off3);
+			uint8_t Green = (uint8_t)(y - off2);
+			uint8_t Blue = (uint8_t)(x + off3);
 			
 			*Pixel++ = ((Red << 16 ) | (Green << 8) | Blue);
 		}
@@ -61,10 +61,16 @@ internal void GameUpdateAndRender(game_memory *GameMemory,
 	game_state *GameState = (game_state *)GameMemory->PermanentStorage;	
 	if(!GameMemory->IsInitialized)
 	{
+		//char* Filename = __FILE__;
+
+		//debug_read_file_result SomeFile = DEBUGPlatformReadEntireFile(Filename);
+		//if (SomeFile.Contents)
+		//{
+		//	DEBUGPlatformWriteEntireFile("D:/handmade/data/test.txt", SomeFile.ContentsSize, SomeFile.Contents);
+		//	DEBUGPlatformFreeFileMemory(SomeFile.Contents);
+		//}
+
 		GameState->ToneHz = 256;
-		GameState->GreenOffset = 5;
-		GameState->RedOffset = 10;
-		GameState->BlueOffset = 15;
 
 		// NOTE: This may be a more appropriate task for the platform layer
 		GameMemory->IsInitialized = true;

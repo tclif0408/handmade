@@ -40,11 +40,10 @@
 #define local_persist static
 #define global_variable static
 
-typedef float real32;
-typedef double real64;
-
 #define Tau32 6.28318530718f
 
+typedef float real32;
+typedef double real64;
 typedef int32_t bool32;
 
 struct win32_screen_buffer {
@@ -69,7 +68,6 @@ struct win32_sound_output {
 	int BytesPerSample;
 	int SecondaryBufferSize;
 };
-
 
 #include "handmade.cpp"
 
@@ -192,6 +190,86 @@ internal void Win32LoadXInput(void)
 		XInputGetState = (x_input_get_state *)GetProcAddress(XInputLibrary, "XInputGetState");
 		XInputSetState = (x_input_set_state *)GetProcAddress(XInputLibrary, "XInputSetState");
 	}
+}
+
+internal debug_read_file_result DEBUGPlatformReadEntireFile(char *Filename)
+{
+	debug_read_file_result Result = {};
+
+	HANDLE FileHandle = CreateFileA(Filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	if (FileHandle != INVALID_HANDLE_VALUE)
+	{
+		LARGE_INTEGER FileSize;	
+		if (GetFileSizeEx(FileHandle, &FileSize))
+		{
+			Result.ContentsSize = SafeTruncateUInt64(FileSize.QuadPart);		// files shouldnt be too big
+			Result.Contents = VirtualAlloc(0, Result.ContentsSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+			if (Result.Contents)
+			{
+				DWORD BytesRead;
+				if (ReadFile(FileHandle, Result.Contents, FileSize.QuadPart, &BytesRead, 0) &&
+							 (Result.ContentsSize == BytesRead))
+				{
+					// File read successfully
+				}
+				else
+				{
+					DEBUGPlatformFreeFileMemory(Result.Contents);
+					Result.Contents = 0;
+				}
+			}
+			else
+			{
+				// TODO: Logging
+			}	
+		}
+		else
+		{
+			// TODO: Logging
+		}
+
+		CloseHandle(FileHandle);
+	}
+	else
+	{
+		// TODO: Logging
+	}
+
+	return (Result);
+}
+
+internal void DEBUGPlatformFreeFileMemory(void *Memory)
+{
+	if (Memory)
+	{
+		VirtualFree(Memory, 0, MEM_RELEASE);
+	}
+}
+
+internal bool32 DEBUGPlatformWriteEntireFile(char *Filename, uint64_t MemorySize, void *Memory)
+{
+	bool32 Result = false;
+
+	HANDLE FileHandle = CreateFileA(Filename, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+	if (FileHandle != INVALID_HANDLE_VALUE)
+	{
+		DWORD BytesWritten;
+		if (WriteFile(FileHandle, Memory, MemorySize, &BytesWritten, 0))
+		{
+			// File was read successfully
+			Result = (BytesWritten == MemorySize);
+		}		
+		else
+		{
+			// TODO: Logging
+		}
+	}
+	else
+	{
+		// TODO: Logging
+	}
+
+	return (Result);
 }
 
 

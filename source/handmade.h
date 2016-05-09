@@ -33,8 +33,30 @@
 #define ArrayCount(Array) (sizeof(Array) / sizeof((Array)[0]))
 
 /*
- *	TODO: Services that the platform layer provides to the game
+ *	NOTE: Services that the platform layer provides to the game
  * */
+
+inline uint32_t SafeTruncateUInt64(uint64_t Value)
+{
+	// TODO: defines for max values
+	Assert(Value <= 0xFFFFFFFF);
+	return ((uint32_t)Value);
+}
+
+
+// STUDY: Preprocessor stuff
+//#if HANDMADE_INTERNAL
+
+struct debug_read_file_result {
+	uint32_t ContentsSize;
+	void *Contents;
+};
+
+internal debug_read_file_result DEBUGPlatformReadEntireFile(char *Filename);
+internal void DEBUGPlatformFreeFileMemory(void *Memory);
+
+internal bool32 DEBUGPlatformWriteEntireFile(char *Filename, uint64_t MemorySize, void *Memory);
+//#endif
 
 /*
  *	NOTE: Services that the game provides to the platform layer
@@ -107,9 +129,10 @@ struct game_memory {
 };
 
 // FOUR THINGS: Timing, controller/keyboard input, bitmap buffer to use, sound buffer to use
-internal void GameUpdateAndRender(game_offscreen_buffer* Buffer,
-								  game_sound_output_buffer *SoundBuffer,
-								  game_input *Input);
+void GameUpdateAndRender(game_memory *GameMemory,
+					     game_offscreen_buffer* Buffer,
+					     game_sound_output_buffer *SoundBuffer,
+					     game_input *Input);
 
 #define HANDMADE_H
 #endif
