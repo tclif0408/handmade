@@ -7,11 +7,10 @@
 
 #include "handmade.h"
 
-internal void GameOutputSound(game_sound_output_buffer *SoundBuffer)
+internal void GameOutputSound(game_sound_output_buffer *SoundBuffer, int ToneHz)
 {
 	local_persist real32 tSine;
 	local_persist int16_t ToneVolume = 3000;
-	int ToneHz = 256;
 	int WavePeriod = SoundBuffer->SamplesPerSecond / ToneHz;
 
 	int16_t *SampleOut = SoundBuffer->Samples;
@@ -26,7 +25,7 @@ internal void GameOutputSound(game_sound_output_buffer *SoundBuffer)
 	}
 }
 
-internal void RenderWeirdGradient(game_offscreen_buffer *Bitmap)
+internal void RenderWeirdGradient(game_offscreen_buffer *Bitmap, int off1, int off2, int off3)
 {
 	int Width = Bitmap->Width;
 	int Height = Bitmap->Height;
@@ -41,9 +40,9 @@ internal void RenderWeirdGradient(game_offscreen_buffer *Bitmap)
 		
 		for (int x = 0; x < Width; x++)
 		{
-			uint8_t Red = (uint8_t)(x);
-			uint8_t Green = (uint8_t)(y);
-			uint8_t Blue = (uint8_t)(x);
+			uint8_t Red = (uint8_t)(x + off1);
+			uint8_t Green = (uint8_t)(y + off2);
+			uint8_t Blue = (uint8_t)(x - off3);
 			
 			*Pixel++ = ((Red << 16 ) | (Green << 8) | Blue);
 		}
@@ -52,10 +51,40 @@ internal void RenderWeirdGradient(game_offscreen_buffer *Bitmap)
 	}
 }
 
-internal void GameUpdateAndRender(game_offscreen_buffer *Buffer, game_sound_output_buffer *SoundBuffer)
+internal void GameUpdateAndRender(game_memory *GameMemory,
+								  game_offscreen_buffer *Buffer,
+								  game_sound_output_buffer *SoundBuffer,
+								  game_input *Input)
 {
+	Assert(sizeof(game_state) <= GameMemory->PermanentStorageSize);
+
+	game_state *GameState = (game_state *)GameMemory->PermanentStorage;	
+	if(!GameMemory->IsInitialized)
+	{
+		GameState->ToneHz = 256;
+		GameState->GreenOffset = 5;
+		GameState->RedOffset = 10;
+		GameState->BlueOffset = 15;
+
+		// NOTE: This may be a more appropriate task for the platform layer
+		GameMemory->IsInitialized = true;
+	}
+
+	//if(Input->IsAnalog)
+	//{
+	//	// Analog movement tuning
+	//}
+	//else
+	//{
+	//	// Digital movement tuning
+	//}
+
+	// Test controller input!
+
 	// TODO: Make sound output more flexible.
-	GameOutputSound(SoundBuffer);
-	RenderWeirdGradient(Buffer);
+	GameOutputSound(SoundBuffer, GameState->ToneHz);
+	RenderWeirdGradient(Buffer, ++GameState->BlueOffset, --GameState->GreenOffset,
+						GameState->RedOffset);
+	GameState->RedOffset += 3;
 }
 
