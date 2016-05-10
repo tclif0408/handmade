@@ -2,9 +2,19 @@
 
 cls
 
+set CommonCompilerFlags=-MT -Gm- -nologo -GR- -EHa- -Oi -WX -W4 -wd4100 -wd4189 -wd4505 -wd4701 -wd4201 -DHAMDMADE_INTERNAL=1 -DHANDMADE_WIN32=1 -Z7 -Fmwin32_handmade.map
+set CommonLinkerFlags=-opt:ref user32.lib gdi32.lib
+
 IF NOT EXIST build\ mkdir build\
 pushd build\
 
-cl -DHAMDMADE_INTERNAL=1 -DHANDMADE_WIN32=1 -Zi ..\source\win32_handmade.cpp user32.lib gdi32.lib
+rem -WX --> treat warnings as errors
+rem -wd#### --> ignore warning ####
+
+rem 32 BIT COMPILE
+rem cl %CommonCompilerFlags ..\source\win32_handmade.cpp /link -subsystem:windows,"5.1" %CommonLinkerFlags
+
+rem 64 BIT COMPILE
+cl %CommonCompilerFlags% ..\source\win32_handmade.cpp /link %CommonLinkerFlags%
 
 popd

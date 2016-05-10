@@ -61,36 +61,49 @@ internal void GameUpdateAndRender(game_memory *GameMemory,
 	game_state *GameState = (game_state *)GameMemory->PermanentStorage;	
 	if(!GameMemory->IsInitialized)
 	{
-		//char* Filename = __FILE__;
-
-		//debug_read_file_result SomeFile = DEBUGPlatformReadEntireFile(Filename);
-		//if (SomeFile.Contents)
-		//{
-		//	DEBUGPlatformWriteEntireFile("D:/handmade/data/test.txt", SomeFile.ContentsSize, SomeFile.Contents);
-		//	DEBUGPlatformFreeFileMemory(SomeFile.Contents);
-		//}
-
 		GameState->ToneHz = 256;
 
 		// NOTE: This may be a more appropriate task for the platform layer
 		GameMemory->IsInitialized = true;
 	}
-
-	//if(Input->IsAnalog)
-	//{
-	//	// Analog movement tuning
-	//}
-	//else
-	//{
-	//	// Digital movement tuning
-	//}
-
-	// Test controller input!
+	
+	// NOTE: Test controller input!
+	
+	if (Input->Controllers[0].Up.EndedDown)
+	{
+		GameState->RedOffset += 5;
+	}
+	if (Input->Controllers[0].Down.EndedDown)
+	{
+		GameState->RedOffset -= 5;
+	}
+	if (Input->Controllers[0].Left.EndedDown)
+	{
+		GameState->GreenOffset += 7;
+	}
+	if (Input->Controllers[0].Right.EndedDown)
+	{
+		GameState->BlueOffset += 7;
+	}
+	if (Input->Controllers[0].LeftShoulder.EndedDown)
+	{
+		GameState->GreenOffset += (GameState->RedOffset * GameState->BlueOffset);
+	}
+	if (Input->Controllers[0].RightShoulder.EndedDown)
+	{
+		if (GameState->RedOffset != 0 && GameState->BlueOffset != 0)
+		{
+			GameState->GreenOffset += (GameState->RedOffset / GameState->BlueOffset);
+		}
+		else
+		{
+			GameState->GreenOffset += (GameState->RedOffset - GameState->BlueOffset);
+		}		
+	}
+	
 
 	// TODO: Make sound output more flexible.
 	GameOutputSound(SoundBuffer, GameState->ToneHz);
-	RenderWeirdGradient(Buffer, ++GameState->BlueOffset, --GameState->GreenOffset,
-						GameState->RedOffset);
-	GameState->RedOffset += 3;
+	RenderWeirdGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset, GameState->RedOffset);
 }
 

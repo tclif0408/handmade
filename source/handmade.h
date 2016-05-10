@@ -109,7 +109,7 @@ struct game_controller_input {
 };
 
 struct game_input {
-	game_controller_input Controllers[4];	
+	game_controller_input Controllers[5];	
 };
 
 struct game_state {
@@ -129,10 +129,10 @@ struct game_memory {
 };
 
 // FOUR THINGS: Timing, controller/keyboard input, bitmap buffer to use, sound buffer to use
-void GameUpdateAndRender(game_memory *GameMemory,
-					     game_offscreen_buffer* Buffer,
-					     game_sound_output_buffer *SoundBuffer,
-					     game_input *Input);
+internal void GameUpdateAndRender(game_memory *GameMemory,
+				   			     game_offscreen_buffer* Buffer,
+				   			     game_sound_output_buffer *SoundBuffer,
+				   			     game_input *Input);
 
 #define HANDMADE_H
 #endif
