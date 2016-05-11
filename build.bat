@@ -2,8 +2,8 @@
 
 cls
 
-set CommonCompilerFlags=-MT -Gm- -nologo -GR- -EHa- -Oi -WX -W4 -wd4100 -wd4189 -wd4505 -wd4701 -wd4201 -DHAMDMADE_INTERNAL=1 -DHANDMADE_WIN32=1 -Z7 -Fmwin32_handmade.map
-set CommonLinkerFlags=-opt:ref user32.lib gdi32.lib
+set CommonCompilerFlags=-MT -Gm- -nologo -GR- -EHa- -Oi -WX -W4 -wd4100 -wd4189 -wd4127 -wd4505 -wd4701 -wd4201 -DHANDMADE_INTERNAL=1 -DHANDMADE_WIN32=1 -Z7 -Fmwin32_handmade.map
+set CommonLinkerFlags=-opt:ref user32.lib gdi32.lib winmm.lib
 
 IF NOT EXIST build\ mkdir build\
 pushd build\
